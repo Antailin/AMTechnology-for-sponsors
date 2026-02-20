@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AM Technology — Инвестиционное предложение</title>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@300;400;600;700;900&family=Geologica:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #0a0a0a;
+    --white: #f4f1eb;
+    --gold: #c9a84c;
+    --gold-light: #e8c97a;
+    --gold-dim: rgba(201,168,76,0.15);
+    --green: #2ecc71;
+    --red: #e74c3c;
+    --surface: #111111;
+    --surface2: #181818;
+    --border: rgba(201,168,76,0.2);
+    --text-muted: #888;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: 'Geologica', sans-serif;
+    font-weight: 300;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.6;
+  }
+
+  /* ── HEADER ── */
+  header {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 48px;
+    background: rgba(10,10,10,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo {
+    font-family: 'Unbounded', sans-serif;
+    font-weight: 700;
+    font-size: 1.1rem;
+    letter-spacing: 0.05em;
+    color: var(--gold);
+  }
+
+  .header-badge {
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    border: 1px solid var(--border);
+    padding: 6px 16px;
+    border-radius: 2px;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 0 48px 80px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 80% 20%, rgba(201,168,76,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 60% at 10% 80%, rgba(201,168,76,0.05) 0%, transparent 50%);
+  }
+
+  .hero-year {
+    font-size: 0.7rem;
+    letter-spacing: 0.35em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 24px;
+    animation: fadeUp 1s ease both;
+  }
+
+  .hero-title {
+    font-family: 'Unbounded', sans-serif;
+    font-weight: 900;
+    font-size: clamp(2.8rem, 7vw, 6rem);
+    line-height: 1.0;
+    letter-spacing: -0.02em;
+    margin-bottom: 16px;
+    animation: fadeUp 1s ease 0.1s both;
+  }
+
+  .hero-title span {
+    display: block;
+    color: var(--gold);
+  }
+
+  .hero-sub {
+    font-size: clamp(0.85rem, 1.2vw, 1rem);
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 64px;
+    animation: fadeUp 1s ease 0.2s both;
+  }
+
+  .hero-metrics {
+    display: grid;
+    grid-template-columns: repeat(3, auto);
+    gap: 0;
+    width: fit-content;
+    border: 1px solid var(--border);
+    animation: fadeUp 1s ease 0.35s both;
+  }
+
+  .hero-metric {
+    padding: 28px 48px;
+    border-right: 1px solid var(--border);
+    position: relative;
+  }
+  .hero-metric:last-child { border-right: none; }
+
+  .hero-metric-val {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--gold);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .hero-metric-label {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .scroll-hint {
+    position: absolute;
+    bottom: 32px;
+    right: 48px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.68rem;
+    letter-spacing: 0.2em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    animation: fadeUp 1s ease 0.5s both;
+  }
+
+  .scroll-line {
+    width: 40px;
+    height: 1px;
+    background: var(--gold);
+    position: relative;
+    overflow: hidden;
+  }
+  .scroll-line::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%;
+    height: 100%;
+    background: var(--white);
+    animation: slideLine 2s ease infinite;
+  }
+
+  /* ── SECTION ── */
+  section {
+    padding: 120px 48px;
+    position: relative;
+  }
+
+  .section-tag {
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-tag::before {
+    content: '';
+    width: 24px;
+    height: 1px;
+    background: var(--gold);
+  }
+
+  .section-title {
+    font-family: 'Unbounded', sans-serif;
+    font-size: clamp(1.6rem, 3vw, 2.4rem);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin-bottom: 64px;
+    line-height: 1.2;
+  }
+
+  /* ── STATS GRID ── */
+  .stats-section { background: var(--surface); }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-bottom: 1px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    padding: 40px;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.3s;
+  }
+  .stat-card:hover { background: var(--surface2); }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 100%;
+    background: var(--gold);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .stat-card:hover::before { opacity: 1; }
+
+  .stat-number {
+    font-family: 'Unbounded', sans-serif;
+    font-size: clamp(1.8rem, 3vw, 2.8rem);
+    font-weight: 700;
+    color: var(--gold-light);
+    line-height: 1;
+    margin-bottom: 10px;
+  }
+
+  .stat-label {
+    font-size: 0.95rem;
+    color: var(--white);
+    margin-bottom: 6px;
+  }
+
+  .stat-note {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+  }
+
+  /* ── DEAL STRUCTURE ── */
+  .deal-section { background: var(--black); }
+
+  .deal-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-bottom: 48px;
+  }
+
+  .deal-row {
+    display: contents;
+  }
+
+  .deal-cell {
+    background: var(--surface);
+    padding: 28px 36px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    transition: background 0.2s;
+  }
+  .deal-cell:hover { background: var(--surface2); }
+
+  .deal-icon {
+    font-size: 1.4rem;
+    flex-shrink: 0;
+  }
+
+  .deal-cell-label {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .deal-cell-value {
+    font-family: 'Unbounded', sans-serif;
+    font-size: clamp(0.9rem, 1.5vw, 1.1rem);
+    font-weight: 600;
+    color: var(--white);
+    line-height: 1.2;
+  }
+
+  .deal-cell-note {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+    font-style: italic;
+  }
+
+  .deal-highlight {
+    background: linear-gradient(135deg, rgba(201,168,76,0.12), rgba(201,168,76,0.04));
+    border: 1px solid var(--border);
+    padding: 24px 36px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    border-left: 3px solid var(--gold);
+  }
+
+  /* ── PAYMENT SCHEDULE ── */
+  .schedule-section { background: var(--surface); }
+
+  .timeline {
+    display: flex;
+    gap: 0;
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+
+  .timeline-item {
+    flex: 1;
+    padding: 40px 32px;
+    border-right: 1px solid var(--border);
+    position: relative;
+    transition: background 0.3s;
+  }
+  .timeline-item:last-child { border-right: none; }
+  .timeline-item:hover { background: rgba(201,168,76,0.05); }
+
+  .timeline-q {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.25em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .timeline-amount {
+    font-family: 'Unbounded', sans-serif;
+    font-size: clamp(1.4rem, 2.5vw, 2rem);
+    font-weight: 700;
+    color: var(--white);
+    line-height: 1;
+    margin-bottom: 10px;
+  }
+
+  .timeline-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+  }
+
+  .timeline-bar {
+    position: absolute;
+    bottom: 0; left: 0;
+    height: 3px;
+    background: var(--gold);
+    opacity: 0.4;
+    transition: opacity 0.3s;
+  }
+  .timeline-item:hover .timeline-bar { opacity: 1; }
+
+  .schedule-note {
+    margin-top: 24px;
+    padding: 20px 28px;
+    border: 1px solid var(--border);
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+  .schedule-note strong { color: var(--gold); }
+
+  /* ── FACTORS ── */
+  .factors-section { background: var(--black); }
+
+  .factors-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+  }
+
+  .factor-group-title {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .factor-group-title.green { color: var(--green); }
+  .factor-group-title.red   { color: var(--red); }
+
+  .factor-list { list-style: none; display: flex; flex-direction: column; gap: 16px; }
+
+  .factor-item {
+    display: flex;
+    gap: 16px;
+    padding: 20px 24px;
+    border: 1px solid;
+    border-radius: 0;
+    transition: background 0.2s;
+  }
+  .factor-item.pro {
+    border-color: rgba(46,204,113,0.2);
+    background: rgba(46,204,113,0.03);
+  }
+  .factor-item.pro:hover { background: rgba(46,204,113,0.07); }
+  .factor-item.con {
+    border-color: rgba(231,76,60,0.2);
+    background: rgba(231,76,60,0.03);
+  }
+  .factor-item.con:hover { background: rgba(231,76,60,0.07); }
+
+  .factor-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 2px; }
+
+  .factor-text strong {
+    display: block;
+    font-size: 0.88rem;
+    color: var(--white);
+    margin-bottom: 4px;
+    font-weight: 500;
+  }
+  .factor-text span {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+  }
+
+  /* ── PERKS ── */
+  .perks-section { background: var(--surface); }
+
+  .perks-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+  }
+
+  .perk-card {
+    background: var(--surface);
+    padding: 36px 32px;
+    transition: background 0.3s;
+    position: relative;
+  }
+  .perk-card:hover { background: var(--surface2); }
+
+  .perk-icon {
+    font-size: 1.8rem;
+    margin-bottom: 16px;
+    display: block;
+  }
+
+  .perk-title {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--white);
+    margin-bottom: 8px;
+    letter-spacing: 0.02em;
+  }
+
+  .perk-desc {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  /* ── VERIFY ── */
+  .verify-section { background: var(--black); }
+
+  .verify-links {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    border: 1px solid var(--border);
+    background: var(--border);
+  }
+
+  .verify-link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 28px 40px;
+    background: var(--surface);
+    text-decoration: none;
+    color: var(--white);
+    transition: background 0.2s;
+    group: '';
+  }
+  .verify-link:hover { background: var(--surface2); }
+
+  .verify-link-left {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .verify-platform {
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .verify-url {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+
+  .verify-arrow {
+    color: var(--gold);
+    font-size: 1.2rem;
+    transition: transform 0.2s;
+  }
+  .verify-link:hover .verify-arrow { transform: translate(4px, -4px); }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 40px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface);
+  }
+
+  .footer-logo {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--gold);
+  }
+
+  .footer-text {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+    text-align: center;
+  }
+
+  .footer-conf {
+    font-size: 0.68rem;
+    letter-spacing: 0.15em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    border: 1px solid var(--border);
+    padding: 8px 16px;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes slideLine {
+    0%   { left: -100%; }
+    100% { left: 200%; }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(32px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    header { padding: 16px 24px; }
+    section { padding: 80px 24px; }
+    .hero { padding: 0 24px 64px; }
+
+    .hero-metrics { grid-template-columns: 1fr; }
+    .hero-metric { border-right: none; border-bottom: 1px solid var(--border); }
+    .hero-metric:last-child { border-bottom: none; }
+
+    .stats-grid { grid-template-columns: 1fr; }
+    .deal-grid { grid-template-columns: 1fr; }
+    .factors-grid { grid-template-columns: 1fr; }
+    .perks-grid { grid-template-columns: 1fr; }
+    .timeline { flex-direction: column; }
+    .timeline-item { border-right: none; border-bottom: 1px solid var(--border); }
+    footer { flex-direction: column; gap: 16px; text-align: center; }
+    .scroll-hint { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">AM Technology</div>
+  <div class="header-badge">Частное инвестирование · 2026</div>
+</header>
+
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div style="position:relative; z-index:1;">
+    <p class="hero-year">Инвестиционное предложение · 2026</p>
+    <h1 class="hero-title">
+      AM Technology
+      <span>Сборка и продажа ПК</span>
+    </h1>
+    <p class="hero-sub">Маркетплейсы · Магазин · Сервисный центр · Доставка техники под заказ</p>
+    <div class="hero-metrics">
+      <div class="hero-metric">
+        <div class="hero-metric-val">1 000 000 ₽</div>
+        <div class="hero-metric-label">Сумма инвестиции</div>
+      </div>
+      <div class="hero-metric">
+        <div class="hero-metric-val">75%</div>
+        <div class="hero-metric-label">Гарантированная доходность / год</div>
+      </div>
+      <div class="hero-metric">
+        <div class="hero-metric-val">300%</div>
+        <div class="hero-metric-label">Рост год к году (3 года)</div>
+      </div>
+    </div>
+  </div>
+  <div class="scroll-hint">
+    <div class="scroll-line"></div>
+    Прокрутите вниз
+  </div>
+</section>
+
+
+<!-- STATS -->
+<section class="stats-section">
+  <div class="section-tag">Бизнес в цифрах</div>
+  <h2 class="section-title reveal">Результаты 2025 года</h2>
+  <div class="stats-grid reveal">
+    <div class="stat-card">
+      <div class="stat-number">56 млн ₽</div>
+      <div class="stat-label">Общий оборот 2025</div>
+      <div class="stat-note">Рост ~300% vs предыдущий год</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">34,5 млн ₽</div>
+      <div class="stat-label">Яндекс.Маркет 2025</div>
+      <div class="stat-note">Активно с мая — 5 месяцев продаж</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">~21,5 млн ₽</div>
+      <div class="stat-label">Офлайн + прочее</div>
+      <div class="stat-note">Магазин, сервис, доставка, кухня</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">3,7 млн</div>
+      <div class="stat-label">Показы на Маркете</div>
+      <div class="stat-note">Органически, без рекламы</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">41 млн ₽</div>
+      <div class="stat-label">Заказано на Маркете</div>
+      <div class="stat-note">34,2 млн доставлено (83%)</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">3 года</div>
+      <div class="stat-label">Возраст компании</div>
+      <div class="stat-note">Белая история, учёт доход-расход</div>
+    </div>
+  </div>
+</section>
+
+
+<!-- DEAL -->
+<section class="deal-section">
+  <div class="section-tag">Условия</div>
+  <h2 class="section-title reveal">Структура сделки</h2>
+
+  <div class="deal-grid reveal">
+    <div class="deal-cell">
+      <div class="deal-icon">💼</div>
+      <div>
+        <div class="deal-cell-label">Сумма инвестиции</div>
+        <div class="deal-cell-value">1 000 000 ₽</div>
+      </div>
+    </div>
+    <div class="deal-cell">
+      <div class="deal-icon">📅</div>
+      <div>
+        <div class="deal-cell-label">Выплата Q1 (гарантировано)</div>
+        <div class="deal-cell-value">150 000 ₽</div>
+      </div>
+    </div>
+    <div class="deal-cell">
+      <div class="deal-icon">📈</div>
+      <div>
+        <div class="deal-cell-label">Выплата Q2, Q3, Q4 (гар. минимум)</div>
+        <div class="deal-cell-value">200 000 ₽ / квартал</div>
+      </div>
+    </div>
+    <div class="deal-cell">
+      <div class="deal-icon">⚡</div>
+      <div>
+        <div class="deal-cell-label">Механизм</div>
+        <div class="deal-cell-value">6% от чистой прибыли ежеквартально</div>
+        <div class="deal-cell-note">Если 6% > мин. — платится факт</div>
+      </div>
+    </div>
+    <div class="deal-cell">
+      <div class="deal-icon">🔁</div>
+      <div>
+        <div class="deal-cell-label">Срок / возврат тела</div>
+        <div class="deal-cell-value">Бессрочно → доля в ООО</div>
+      </div>
+    </div>
+    <div class="deal-cell">
+      <div class="deal-icon">🤝</div>
+      <div>
+        <div class="deal-cell-label">Обеспечение</div>
+        <div class="deal-cell-value">Личное поручительство</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="deal-highlight reveal">
+    <strong style="color:var(--gold);">750 000 ₽ / год</strong> — гарантированный минимум<br>
+    150 000 ₽ в Q1 + 200 000 ₽ × 3 квартала
+  </div>
+</section>
+
+
+<!-- SCHEDULE -->
+<section class="schedule-section">
+  <div class="section-tag">Выплаты</div>
+  <h2 class="section-title reveal">График выплат</h2>
+  <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:40px; margin-top:-40px;" class="reveal">Ежеквартальные выплаты — гарантированный минимум</p>
+
+  <div class="timeline reveal">
+    <div class="timeline-item">
+      <div class="timeline-q">Q1</div>
+      <div class="timeline-amount">150 000 ₽</div>
+      <div class="timeline-label">Первый квартал</div>
+      <div class="timeline-bar" style="width:75%"></div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-q">Q2</div>
+      <div class="timeline-amount">200 000 ₽</div>
+      <div class="timeline-label">Второй квартал</div>
+      <div class="timeline-bar" style="width:100%"></div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-q">Q3</div>
+      <div class="timeline-amount">200 000 ₽</div>
+      <div class="timeline-label">Третий квартал</div>
+      <div class="timeline-bar" style="width:100%"></div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-q">∞</div>
+      <div class="timeline-amount">200 000+ ₽</div>
+      <div class="timeline-label">Каждый следующий</div>
+      <div class="timeline-bar" style="width:100%"></div>
+    </div>
+  </div>
+
+  <div class="schedule-note reveal">
+    ✓ Если <strong>6% от реальной чистой прибыли</strong> превышает минимум — инвестор получает фактическую сумму, не минимум
+  </div>
+</section>
+
+
+<!-- FACTORS -->
+<section class="factors-section">
+  <div class="section-tag">Анализ</div>
+  <h2 class="section-title reveal">Факторы сделки</h2>
+
+  <div class="factors-grid reveal">
+    <!-- PROS -->
+    <div>
+      <div class="factor-group-title green">✅ Сильные стороны</div>
+      <ul class="factor-list">
+        <li class="factor-item pro">
+          <div class="factor-icon">📊</div>
+          <div class="factor-text">
+            <strong>Реальный бизнес</strong>
+            <span>Маркет, физточка, сайт верифицированы публично</span>
+          </div>
+        </li>
+        <li class="factor-item pro">
+          <div class="factor-icon">🚀</div>
+          <div class="factor-text">
+            <strong>300% рост</strong>
+            <span>3 года подряд, органически без рекламы</span>
+          </div>
+        </li>
+        <li class="factor-item pro">
+          <div class="factor-icon">📒</div>
+          <div class="factor-text">
+            <strong>Прозрачный учёт</strong>
+            <span>С 2026 — наёмный бухгалтер, доход-расход, счёт-фактуры</span>
+          </div>
+        </li>
+        <li class="factor-item pro">
+          <div class="factor-icon">👥</div>
+          <div class="factor-text">
+            <strong>Сообщество инвесторов</strong>
+            <span>4 действующих, положительный опыт</span>
+          </div>
+        </li>
+        <li class="factor-item pro">
+          <div class="factor-icon">🔒</div>
+          <div class="factor-text">
+            <strong>Личное поручительство</strong>
+            <span>Основатель готов подписать</span>
+          </div>
+        </li>
+        <li class="factor-item pro">
+          <div class="factor-icon">🏪</div>
+          <div class="factor-text">
+            <strong>Мультиканальность</strong>
+            <span>Маркет, магазин, сервис, доставка под заказ</span>
+          </div>
+        </li>
+        <li class="factor-item pro">
+          <div class="factor-icon">💡</div>
+          <div class="factor-text">
+            <strong>Открытость</strong>
+            <span>Основатель делится данными, встречается регулярно</span>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- CONS -->
+    <div>
+      <div class="factor-group-title red">⚠️ Риски и открытые вопросы</div>
+      <ul class="factor-list">
+        <li class="factor-item con">
+          <div class="factor-icon">📝</div>
+          <div class="factor-text">
+            <strong>Формула чистой прибыли</strong>
+            <span>Нужно прописать в договоре чётко: что входит, что вычитается</span>
+          </div>
+        </li>
+        <li class="factor-item con">
+          <div class="factor-icon">🏢</div>
+          <div class="factor-text">
+            <strong>Переход на ООО</strong>
+            <span>Срок не определён, механизм конвертации доли не зафиксирован</span>
+          </div>
+        </li>
+        <li class="factor-item con">
+          <div class="factor-icon">💰</div>
+          <div class="factor-text">
+            <strong>Долговая нагрузка</strong>
+            <span>После входа 1,5 млн/квартал фиксированных обязательств всем инвесторам</span>
+          </div>
+        </li>
+        <li class="factor-item con">
+          <div class="factor-icon">🔍</div>
+          <div class="factor-text">
+            <strong>Верификация прибыли</strong>
+            <span>Нужен доступ к кабинету или регулярный управленческий отчёт</span>
+          </div>
+        </li>
+        <li class="factor-item con">
+          <div class="factor-icon">📦</div>
+          <div class="factor-text">
+            <strong>Концентрация на Маркете</strong>
+            <span>61% оборота зависит от одной платформы</span>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+
+<!-- PERKS -->
+<section class="perks-section">
+  <div class="section-tag">Нефинансовые условия</div>
+  <h2 class="section-title reveal">Бонусы для инвестора</h2>
+
+  <div class="perks-grid reveal">
+    <div class="perk-card">
+      <span class="perk-icon">📱</span>
+      <div class="perk-title">Замена устройств</div>
+      <div class="perk-desc">3 устройства ежегодно бесплатно: телефон, ноут, ТВ</div>
+    </div>
+    <div class="perk-card">
+      <span class="perk-icon">🤝</span>
+      <div class="perk-title">Совет инвесторов</div>
+      <div class="perk-desc">Квартальные встречи после выплат</div>
+    </div>
+    <div class="perk-card">
+      <span class="perk-icon">📊</span>
+      <div class="perk-title">Отчётность</div>
+      <div class="perk-desc">Ежемесячные счёт-фактуры, скрины кабинетов</div>
+    </div>
+    <div class="perk-card">
+      <span class="perk-icon">💬</span>
+      <div class="perk-title">Личный контакт</div>
+      <div class="perk-desc">Регулярные встречи с основателем</div>
+    </div>
+    <div class="perk-card">
+      <span class="perk-icon">🏬</span>
+      <div class="perk-title">Вовлечённость</div>
+      <div class="perk-desc">Участие в ключевых решениях и проектах</div>
+    </div>
+    <div class="perk-card">
+      <span class="perk-icon">📈</span>
+      <div class="perk-title">Доля в ООО</div>
+      <div class="perk-desc">Конвертация займа в долю при регистрации ООО</div>
+    </div>
+  </div>
+</section>
+
+
+<!-- VERIFY -->
+<section class="verify-section">
+  <div class="section-tag">Верификация</div>
+  <h2 class="section-title reveal">Проверить бизнес</h2>
+
+  <div class="verify-links reveal">
+    <a href="https://market.yandex.ru/cc/8pEnZk" target="_blank" class="verify-link">
+      <div class="verify-link-left">
+        <span style="font-size:1.6rem">🛒</span>
+        <div>
+          <div class="verify-platform">Яндекс.Маркет</div>
+          <div class="verify-url">market.yandex.ru/cc/8pEnZk</div>
+        </div>
+      </div>
+      <span class="verify-arrow">↗</span>
+    </a>
+    <a href="https://amtechnology.shop" target="_blank" class="verify-link">
+      <div class="verify-link-left">
+        <span style="font-size:1.6rem">🌐</span>
+        <div>
+          <div class="verify-platform">Интернет-магазин</div>
+          <div class="verify-url">amtechnology.shop</div>
+        </div>
+      </div>
+      <span class="verify-arrow">↗</span>
+    </a>
+    <a href="https://yandex.ru/maps/org/a_m_tekhnologii/198261445651" target="_blank" class="verify-link">
+      <div class="verify-link-left">
+        <span style="font-size:1.6rem">📍</span>
+        <div>
+          <div class="verify-platform">Физическая точка</div>
+          <div class="verify-url">yandex.ru/maps · A&amp;M Технологии</div>
+        </div>
+      </div>
+      <span class="verify-arrow">↗</span>
+    </a>
+  </div>
+</section>
+
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">AM Technology</div>
+  <div class="footer-text">AM Technology · Инвестиционное предложение · 2026</div>
+  <div class="footer-conf">Конфиденциально</div>
+</footer>
+
+
+<script>
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('visible'), i * 80);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  reveals.forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
