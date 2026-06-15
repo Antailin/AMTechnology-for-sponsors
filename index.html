@@ -4,20 +4,28 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>А&amp;М Технологии — Инвестиционное предложение</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@300;400;600;700;900&family=Geologica:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --black: #0a0a0a;
+    --black: #080807;
+    --black-2: #0d0d0c;
     --white: #f4f1eb;
     --gold: #c9a84c;
     --gold-light: #e8c97a;
+    --gold-deep: #a8842e;
     --gold-dim: rgba(201,168,76,0.15);
-    --green: #2ecc71;
-    --red: #e74c3c;
-    --surface: #111111;
-    --surface2: #181818;
-    --border: rgba(201,168,76,0.2);
-    --text-muted: #888;
+    --green: #4cd083;
+    --red: #e76a5c;
+    --surface: #111110;
+    --surface2: #1a1a18;
+    --border: rgba(201,168,76,0.18);
+    --border-soft: rgba(201,168,76,0.10);
+    --text-muted: #8a8780;
+    --gold-grad: linear-gradient(135deg, #f0d488 0%, #c9a84c 48%, #9c7a2a 100%);
+    --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    --ease-soft: cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -33,6 +41,18 @@
     overflow-x: hidden;
   }
 
+  ::selection { background: var(--gold); color: var(--black); }
+
+  ::-webkit-scrollbar { width: 10px; }
+  ::-webkit-scrollbar-track { background: var(--black); }
+  ::-webkit-scrollbar-thumb { background: linear-gradient(var(--gold), var(--gold-deep)); border-radius: 10px; border: 2px solid var(--black); }
+  ::-webkit-scrollbar-thumb:hover { background: var(--gold-light); }
+
+  a:focus-visible, .verify-link:focus-visible {
+    outline: 2px solid var(--gold-light);
+    outline-offset: 3px;
+  }
+
   /* ── NOISE OVERLAY ── */
   body::before {
     content: '';
@@ -40,7 +60,56 @@
     inset: 0;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
     pointer-events: none;
-    z-index: 0;
+    z-index: 1;
+    opacity: 0.55;
+  }
+
+  /* ── SCROLL PROGRESS ── */
+  .scroll-progress {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    z-index: 300;
+    background: transparent;
+  }
+  .scroll-progress-bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--gold-deep), var(--gold-light));
+    box-shadow: 0 0 14px rgba(201,168,76,0.8);
+    transition: width 0.08s linear;
+  }
+
+  /* ── GOLDEN THREAD (winds around blocks, behind content) ── */
+  #thread {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    z-index: 1;            /* above section background bands, below content (z-index:1, drawn later in DOM) */
+    pointer-events: none;
+    overflow: visible;
+  }
+  .thread-ghost {
+    fill: none;
+    stroke: rgba(201,168,76,0.10);
+    stroke-width: 1.5;
+    stroke-linecap: round;
+  }
+  .thread-active {
+    fill: none;
+    stroke: url(#threadGrad);
+    stroke-width: 2;
+    stroke-linecap: round;
+    filter: drop-shadow(0 0 5px rgba(201,168,76,0.55));
+  }
+  .thread-head {
+    fill: var(--gold-light);
+    filter: drop-shadow(0 0 9px rgba(232,201,122,0.95));
+  }
+  .thread-head-ring {
+    fill: none;
+    stroke: var(--gold-light);
+    stroke-width: 1.2;
     opacity: 0.6;
   }
 
@@ -48,13 +117,20 @@
   header {
     position: fixed;
     top: 0; left: 0; right: 0;
-    z-index: 100;
+    z-index: 200;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 20px 48px;
-    background: rgba(10,10,10,0.85);
-    backdrop-filter: blur(12px);
+    padding: 22px 48px;
+    background: rgba(8,8,7,0.4);
+    backdrop-filter: blur(6px);
+    border-bottom: 1px solid transparent;
+    transition: padding 0.4s var(--ease), background 0.4s var(--ease), border-color 0.4s var(--ease);
+  }
+  header.scrolled {
+    padding: 14px 48px;
+    background: rgba(8,8,7,0.88);
+    backdrop-filter: blur(14px);
     border-bottom: 1px solid var(--border);
   }
 
@@ -64,6 +140,16 @@
     font-size: 1.1rem;
     letter-spacing: 0.05em;
     color: var(--gold);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .logo-mark {
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    background: var(--gold-light);
+    box-shadow: 0 0 12px var(--gold);
+    animation: pulse 2.6s var(--ease-soft) infinite;
   }
 
   .header-badge {
@@ -89,11 +175,49 @@
 
   .hero-bg {
     position: absolute;
-    inset: 0;
+    top: -12%; left: 0; right: 0;
+    height: 124%;
+    z-index: 0;
+    will-change: transform;
     background:
-      radial-gradient(ellipse 60% 50% at 80% 20%, rgba(201,168,76,0.08) 0%, transparent 60%),
-      radial-gradient(ellipse 40% 60% at 10% 80%, rgba(201,168,76,0.05) 0%, transparent 50%);
+      radial-gradient(ellipse 60% 50% at 82% 18%, rgba(201,168,76,0.10) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 60% at 8% 82%, rgba(201,168,76,0.06) 0%, transparent 50%);
   }
+
+  .hero-grid {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background-image:
+      linear-gradient(rgba(201,168,76,0.045) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(201,168,76,0.045) 1px, transparent 1px);
+    background-size: 64px 64px;
+    -webkit-mask-image: radial-gradient(ellipse 75% 60% at 72% 32%, #000 0%, transparent 78%);
+            mask-image: radial-gradient(ellipse 75% 60% at 72% 32%, #000 0%, transparent 78%);
+  }
+
+  .orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(70px);
+    z-index: 0;
+    will-change: transform;
+    pointer-events: none;
+  }
+  .orb-1 {
+    width: 380px; height: 380px;
+    top: 6%; right: 8%;
+    background: radial-gradient(circle, rgba(201,168,76,0.16), transparent 70%);
+    animation: drift1 16s ease-in-out infinite;
+  }
+  .orb-2 {
+    width: 300px; height: 300px;
+    bottom: 14%; left: 2%;
+    background: radial-gradient(circle, rgba(201,168,76,0.10), transparent 70%);
+    animation: drift2 20s ease-in-out infinite;
+  }
+
+  .hero-inner { position: relative; z-index: 2; }
 
   .hero-year {
     font-size: 0.7rem;
@@ -101,8 +225,14 @@
     color: var(--gold);
     text-transform: uppercase;
     margin-bottom: 24px;
-    animation: fadeUp 1s ease both;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    opacity: 0;
+    transform: translateY(16px);
   }
+  .hero.loaded .hero-year { opacity: 1; transform: none; transition: opacity 0.8s var(--ease) 0.1s, transform 0.8s var(--ease) 0.1s; }
+  .hero-year::before { content: ''; width: 28px; height: 1px; background: var(--gold); }
 
   .hero-title {
     font-family: 'Unbounded', sans-serif;
@@ -110,13 +240,25 @@
     font-size: clamp(2.8rem, 7vw, 6rem);
     line-height: 1.0;
     letter-spacing: -0.02em;
-    margin-bottom: 16px;
-    animation: fadeUp 1s ease 0.1s both;
+    margin-bottom: 18px;
   }
 
-  .hero-title span {
+  .line-mask { display: block; overflow: hidden; padding-bottom: 0.06em; }
+  .line-inner {
     display: block;
-    color: var(--gold);
+    transform: translateY(112%);
+    transition: transform 0.95s var(--ease);
+  }
+  .hero.loaded .line-inner { transform: translateY(0); }
+  .line-mask:nth-child(1) .line-inner { transition-delay: 0.18s; }
+  .line-mask:nth-child(2) .line-inner { transition-delay: 0.30s; }
+
+  .gold-text {
+    background: var(--gold-grad);
+    -webkit-background-clip: text;
+            background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 4px 30px rgba(201,168,76,0.25));
   }
 
   .hero-sub {
@@ -125,32 +267,48 @@
     letter-spacing: 0.1em;
     text-transform: uppercase;
     margin-bottom: 64px;
-    animation: fadeUp 1s ease 0.2s both;
+    opacity: 0;
+    transform: translateY(16px);
   }
+  .hero.loaded .hero-sub { opacity: 1; transform: none; transition: opacity 0.8s var(--ease) 0.5s, transform 0.8s var(--ease) 0.5s; }
 
   .hero-metrics {
     display: grid;
     grid-template-columns: repeat(3, auto);
-    gap: 0;
     width: fit-content;
     border: 1px solid var(--border);
-    animation: fadeUp 1s ease 0.35s both;
+    position: relative;
+    opacity: 0;
+    transform: translateY(20px);
   }
+  .hero.loaded .hero-metrics { opacity: 1; transform: none; transition: opacity 0.9s var(--ease) 0.65s, transform 0.9s var(--ease) 0.65s; }
+  .hero-metrics::before {
+    content: '';
+    position: absolute;
+    top: -1px; left: 0;
+    height: 2px; width: 0;
+    background: var(--gold-grad);
+    box-shadow: 0 0 12px rgba(201,168,76,0.6);
+  }
+  .hero.loaded .hero-metrics::before { width: 100%; transition: width 1.2s var(--ease) 0.9s; }
 
   .hero-metric {
     padding: 28px 48px;
     border-right: 1px solid var(--border);
     position: relative;
+    transition: background 0.3s;
   }
   .hero-metric:last-child { border-right: none; }
+  .hero-metric:hover { background: rgba(201,168,76,0.05); }
 
   .hero-metric-val {
     font-family: 'Unbounded', sans-serif;
     font-size: 2.2rem;
     font-weight: 700;
-    color: var(--gold);
+    color: var(--gold-light);
     line-height: 1;
     margin-bottom: 6px;
+    font-variant-numeric: tabular-nums;
   }
 
   .hero-metric-label {
@@ -164,6 +322,7 @@
     position: absolute;
     bottom: 32px;
     right: 48px;
+    z-index: 2;
     display: flex;
     align-items: center;
     gap: 12px;
@@ -171,12 +330,12 @@
     letter-spacing: 0.2em;
     color: var(--text-muted);
     text-transform: uppercase;
-    animation: fadeUp 1s ease 0.5s both;
+    opacity: 0;
   }
+  .hero.loaded .scroll-hint { opacity: 1; transition: opacity 1s ease 1.1s; }
 
   .scroll-line {
-    width: 40px;
-    height: 1px;
+    width: 40px; height: 1px;
     background: var(--gold);
     position: relative;
     overflow: hidden;
@@ -185,8 +344,7 @@
     content: '';
     position: absolute;
     top: 0; left: -100%;
-    width: 100%;
-    height: 100%;
+    width: 100%; height: 100%;
     background: var(--white);
     animation: slideLine 2s ease infinite;
   }
@@ -196,6 +354,7 @@
     padding: 120px 48px;
     position: relative;
   }
+  section:not(.hero) > * { position: relative; z-index: 1; }
 
   .section-tag {
     font-size: 0.65rem;
@@ -207,12 +366,7 @@
     align-items: center;
     gap: 12px;
   }
-  .section-tag::before {
-    content: '';
-    width: 24px;
-    height: 1px;
-    background: var(--gold);
-  }
+  .section-tag::before { content: ''; width: 24px; height: 1px; background: var(--gold); }
 
   .section-title {
     font-family: 'Unbounded', sans-serif;
@@ -223,6 +377,29 @@
     line-height: 1.2;
   }
 
+  /* ── REVEAL + STAGGER ── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(34px);
+    transition: opacity 0.8s var(--ease), transform 0.8s var(--ease);
+  }
+  .reveal.visible { opacity: 1; transform: none; }
+
+  .stagger > * {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.7s var(--ease), transform 0.7s var(--ease);
+  }
+  .stagger.visible > * { opacity: 1; transform: none; }
+  .stagger.visible > *:nth-child(1) { transition-delay: 0.05s; }
+  .stagger.visible > *:nth-child(2) { transition-delay: 0.11s; }
+  .stagger.visible > *:nth-child(3) { transition-delay: 0.17s; }
+  .stagger.visible > *:nth-child(4) { transition-delay: 0.23s; }
+  .stagger.visible > *:nth-child(5) { transition-delay: 0.29s; }
+  .stagger.visible > *:nth-child(6) { transition-delay: 0.35s; }
+  .stagger.visible > *:nth-child(7) { transition-delay: 0.41s; }
+  .stagger.visible > *:nth-child(8) { transition-delay: 0.47s; }
+
   /* ── STATS GRID ── */
   .stats-section { background: var(--surface); }
 
@@ -232,7 +409,6 @@
     gap: 1px;
     background: var(--border);
     border: 1px solid var(--border);
-    margin-bottom: 1px;
   }
 
   .stat-card {
@@ -240,20 +416,32 @@
     padding: 40px;
     position: relative;
     overflow: hidden;
-    transition: background 0.3s;
+    transition: background 0.3s, transform 0.4s var(--ease);
   }
-  .stat-card:hover { background: var(--surface2); }
+  .stat-card:hover { background: var(--surface2); transform: translateY(-3px); }
 
   .stat-card::before {
     content: '';
     position: absolute;
     top: 0; left: 0;
     width: 3px; height: 100%;
-    background: var(--gold);
-    opacity: 0;
-    transition: opacity 0.3s;
+    background: var(--gold-grad);
+    transform: scaleY(0);
+    transform-origin: top;
+    transition: transform 0.4s var(--ease);
   }
-  .stat-card:hover::before { opacity: 1; }
+  .stat-card:hover::before { transform: scaleY(1); }
+
+  .stat-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.4s;
+    background: radial-gradient(180px circle at var(--mx, 50%) var(--my, 50%), rgba(201,168,76,0.10), transparent 60%);
+    pointer-events: none;
+  }
+  .stat-card:hover::after { opacity: 1; }
 
   .stat-number {
     font-family: 'Unbounded', sans-serif;
@@ -262,19 +450,11 @@
     color: var(--gold-light);
     line-height: 1;
     margin-bottom: 10px;
+    font-variant-numeric: tabular-nums;
   }
 
-  .stat-label {
-    font-size: 0.95rem;
-    color: var(--white);
-    margin-bottom: 6px;
-  }
-
-  .stat-note {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-    letter-spacing: 0.05em;
-  }
+  .stat-label { font-size: 0.95rem; color: var(--white); margin-bottom: 6px; }
+  .stat-note { font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.05em; }
 
   /* ── DEAL STRUCTURE ── */
   .deal-section { background: var(--black); }
@@ -282,14 +462,10 @@
   .deal-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 2px;
+    gap: 1px;
     background: var(--border);
     border: 1px solid var(--border);
     margin-bottom: 48px;
-  }
-
-  .deal-row {
-    display: contents;
   }
 
   .deal-cell {
@@ -298,14 +474,11 @@
     display: flex;
     align-items: center;
     gap: 20px;
-    transition: background 0.2s;
+    transition: background 0.25s;
   }
   .deal-cell:hover { background: var(--surface2); }
 
-  .deal-icon {
-    font-size: 1.4rem;
-    flex-shrink: 0;
-  }
+  .deal-icon { font-size: 1.4rem; flex-shrink: 0; }
 
   .deal-cell-label {
     font-size: 0.72rem;
@@ -314,7 +487,6 @@
     text-transform: uppercase;
     margin-bottom: 4px;
   }
-
   .deal-cell-value {
     font-family: 'Unbounded', sans-serif;
     font-size: clamp(0.9rem, 1.5vw, 1.1rem);
@@ -322,29 +494,23 @@
     color: var(--white);
     line-height: 1.2;
   }
-
-  .deal-cell-note {
-    font-size: 0.72rem;
-    color: var(--text-muted);
-    margin-top: 4px;
-    font-style: italic;
-  }
+  .deal-cell-note { font-size: 0.72rem; color: var(--text-muted); margin-top: 4px; font-style: italic; }
 
   .deal-highlight {
-    background: linear-gradient(135deg, rgba(201,168,76,0.12), rgba(201,168,76,0.04));
+    background: linear-gradient(135deg, rgba(201,168,76,0.13), rgba(201,168,76,0.03));
     border: 1px solid var(--border);
+    border-left: 3px solid var(--gold);
     padding: 24px 36px;
     font-size: 0.85rem;
     color: var(--text-muted);
-    border-left: 3px solid var(--gold);
   }
+  .deal-highlight strong { color: var(--gold-light); font-variant-numeric: tabular-nums; }
 
   /* ── PAYMENT SCHEDULE ── */
   .schedule-section { background: var(--surface); }
 
   .timeline {
     display: flex;
-    gap: 0;
     border: 1px solid var(--border);
     overflow: hidden;
   }
@@ -368,7 +534,6 @@
     text-transform: uppercase;
     margin-bottom: 20px;
   }
-
   .timeline-amount {
     font-family: 'Unbounded', sans-serif;
     font-size: clamp(1.4rem, 2.5vw, 2rem);
@@ -376,23 +541,20 @@
     color: var(--white);
     line-height: 1;
     margin-bottom: 10px;
+    font-variant-numeric: tabular-nums;
   }
-
-  .timeline-label {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-    letter-spacing: 0.05em;
-  }
+  .timeline-label { font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.05em; }
 
   .timeline-bar {
     position: absolute;
     bottom: 0; left: 0;
     height: 3px;
-    background: var(--gold);
-    opacity: 0.4;
-    transition: opacity 0.3s;
+    width: 0;
+    background: var(--gold-grad);
+    opacity: 0.7;
+    transition: width 1.1s var(--ease);
   }
-  .timeline-item:hover .timeline-bar { opacity: 1; }
+  .timeline-item:hover .timeline-bar { opacity: 1; box-shadow: 0 0 10px rgba(201,168,76,0.6); }
 
   .schedule-note {
     margin-top: 24px;
@@ -404,14 +566,105 @@
   }
   .schedule-note strong { color: var(--gold); }
 
+  /* ── CUMULATIVE CHART (signature) ── */
+  .chart-wrap {
+    margin-top: 56px;
+    border: 1px solid var(--border);
+    background: linear-gradient(180deg, rgba(201,168,76,0.04), transparent 60%), var(--black-2);
+    padding: 40px 40px 28px;
+  }
+  .chart-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .chart-title {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--white);
+  }
+  .chart-sub { font-size: 0.78rem; color: var(--text-muted); margin-top: 4px; }
+  .chart-legend { display: flex; gap: 22px; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 8px; font-size: 0.74rem; color: var(--text-muted); }
+  .legend-swatch { width: 18px; height: 3px; border-radius: 2px; }
+  .legend-swatch.line { background: var(--gold-light); }
+  .legend-swatch.principal { background: transparent; border-top: 2px dashed var(--gold); height: 0; }
+
+  .chart-svg { width: 100%; height: auto; display: block; }
+  .chart-svg text { font-family: 'Geologica', sans-serif; }
+
+  .grid-line { stroke: rgba(201,168,76,0.10); stroke-width: 1; }
+  .axis-label { fill: var(--text-muted); font-size: 11px; }
+  .x-label { fill: var(--text-muted); font-size: 11px; text-anchor: middle; }
+
+  .chart-area { opacity: 0; transition: opacity 1.1s ease 0.5s; }
+  .chart-wrap.draw .chart-area { opacity: 1; }
+
+  .chart-line {
+    fill: none;
+    stroke: url(#lineGrad);
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    filter: drop-shadow(0 0 8px rgba(201,168,76,0.4));
+    transition: stroke-dashoffset 2.1s var(--ease);
+  }
+
+  .chart-principal {
+    stroke: var(--gold);
+    stroke-width: 1.5;
+    stroke-dasharray: 6 6;
+    opacity: 0;
+    transition: opacity 0.8s ease 1.3s;
+  }
+  .chart-wrap.draw .chart-principal { opacity: 0.75; }
+  .principal-label { fill: var(--gold); font-size: 11px; font-weight: 500; opacity: 0; transition: opacity 0.8s ease 1.5s; text-anchor: end; }
+  .chart-wrap.draw .principal-label { opacity: 1; }
+
+  .chart-dot {
+    fill: var(--black);
+    stroke: var(--gold-light);
+    stroke-width: 2.5;
+    opacity: 0;
+    transform: scale(0);
+    transform-box: fill-box;
+    transform-origin: center;
+    transition: opacity 0.35s ease, transform 0.4s var(--ease);
+  }
+  .chart-wrap.draw .chart-dot { opacity: 1; transform: scale(1); }
+  .chart-wrap.draw .chart-dot:nth-of-type(1) { transition-delay: 0.6s; }
+  .chart-wrap.draw .chart-dot:nth-of-type(2) { transition-delay: 0.85s; }
+  .chart-wrap.draw .chart-dot:nth-of-type(3) { transition-delay: 1.1s; }
+  .chart-wrap.draw .chart-dot:nth-of-type(4) { transition-delay: 1.35s; }
+  .chart-wrap.draw .chart-dot:nth-of-type(5) { transition-delay: 1.6s; }
+  .chart-wrap.draw .chart-dot:nth-of-type(6) { transition-delay: 1.85s; }
+  .chart-wrap.draw .chart-dot:nth-of-type(7) { transition-delay: 2.1s; }
+  .chart-wrap.draw .chart-dot:nth-of-type(8) { transition-delay: 2.35s; }
+
+  .cross-marker { opacity: 0; transition: opacity 0.6s ease 2.2s; }
+  .chart-wrap.draw .cross-marker { opacity: 1; }
+  .cross-ring {
+    fill: none;
+    stroke: var(--green);
+    stroke-width: 2;
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: ringPulse 2.4s var(--ease-soft) infinite;
+  }
+  .cross-dot { fill: var(--green); }
+  .cross-label { fill: var(--green); font-size: 11px; font-weight: 500; }
+
+  .chart-foot { margin-top: 18px; font-size: 0.76rem; color: var(--text-muted); font-style: italic; }
+  .chart-foot strong { color: var(--green); font-style: normal; }
+
   /* ── FACTORS ── */
   .factors-section { background: var(--black); }
 
-  .factors-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 48px;
-  }
+  .factors-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; }
 
   .factor-group-title {
     font-family: 'Unbounded', sans-serif;
@@ -433,33 +686,17 @@
     gap: 16px;
     padding: 20px 24px;
     border: 1px solid;
-    border-radius: 0;
-    transition: background 0.2s;
+    transition: background 0.25s, transform 0.35s var(--ease), border-color 0.25s;
   }
-  .factor-item.pro {
-    border-color: rgba(46,204,113,0.2);
-    background: rgba(46,204,113,0.03);
-  }
-  .factor-item.pro:hover { background: rgba(46,204,113,0.07); }
-  .factor-item.con {
-    border-color: rgba(231,76,60,0.2);
-    background: rgba(231,76,60,0.03);
-  }
-  .factor-item.con:hover { background: rgba(231,76,60,0.07); }
+  .factor-item.pro { border-color: rgba(76,208,131,0.2); background: rgba(76,208,131,0.03); }
+  .factor-item.pro:hover { background: rgba(76,208,131,0.08); transform: translateX(4px); border-color: rgba(76,208,131,0.4); }
+  .factor-item.con { border-color: rgba(231,106,92,0.2); background: rgba(231,106,92,0.03); }
+  .factor-item.con:hover { background: rgba(231,106,92,0.08); transform: translateX(4px); border-color: rgba(231,106,92,0.4); }
 
   .factor-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 2px; }
 
-  .factor-text strong {
-    display: block;
-    font-size: 0.88rem;
-    color: var(--white);
-    margin-bottom: 4px;
-    font-weight: 500;
-  }
-  .factor-text span {
-    font-size: 0.78rem;
-    color: var(--text-muted);
-  }
+  .factor-text strong { display: block; font-size: 0.88rem; color: var(--white); margin-bottom: 4px; font-weight: 500; }
+  .factor-text span { font-size: 0.78rem; color: var(--text-muted); }
 
   /* ── PERKS ── */
   .perks-section { background: var(--surface); }
@@ -475,16 +712,29 @@
   .perk-card {
     background: var(--surface);
     padding: 36px 32px;
-    transition: background 0.3s;
+    transition: background 0.3s, transform 0.4s var(--ease);
     position: relative;
+    overflow: hidden;
   }
-  .perk-card:hover { background: var(--surface2); }
+  .perk-card:hover { background: var(--surface2); transform: translateY(-3px); }
+  .perk-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.4s;
+    background: radial-gradient(160px circle at var(--mx, 50%) var(--my, 50%), rgba(201,168,76,0.08), transparent 60%);
+    pointer-events: none;
+  }
+  .perk-card:hover::after { opacity: 1; }
 
   .perk-icon {
     font-size: 1.8rem;
     margin-bottom: 16px;
-    display: block;
+    display: inline-block;
+    transition: transform 0.4s var(--ease);
   }
+  .perk-card:hover .perk-icon { transform: scale(1.12) rotate(-4deg); }
 
   .perk-title {
     font-family: 'Unbounded', sans-serif;
@@ -494,12 +744,7 @@
     margin-bottom: 8px;
     letter-spacing: 0.02em;
   }
-
-  .perk-desc {
-    font-size: 0.8rem;
-    color: var(--text-muted);
-    line-height: 1.5;
-  }
+  .perk-desc { font-size: 0.8rem; color: var(--text-muted); line-height: 1.5; }
 
   /* ── VERIFY ── */
   .verify-section { background: var(--black); }
@@ -520,37 +765,34 @@
     background: var(--surface);
     text-decoration: none;
     color: var(--white);
-    transition: background 0.2s;
-    group: '';
+    transition: background 0.25s;
+    position: relative;
+    overflow: hidden;
+  }
+  .verify-link::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 100%;
+    background: var(--gold-grad);
+    transform: scaleY(0);
+    transform-origin: top;
+    transition: transform 0.4s var(--ease);
   }
   .verify-link:hover { background: var(--surface2); }
+  .verify-link:hover::before { transform: scaleY(1); }
 
-  .verify-link-left {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-  }
+  .verify-link-left { display: flex; align-items: center; gap: 20px; }
 
-  .verify-platform {
-    font-size: 0.7rem;
-    letter-spacing: 0.15em;
-    color: var(--gold);
-    text-transform: uppercase;
-    margin-bottom: 4px;
-  }
-
-  .verify-url {
-    font-family: 'Unbounded', sans-serif;
-    font-size: 0.9rem;
-    font-weight: 500;
-  }
+  .verify-platform { font-size: 0.7rem; letter-spacing: 0.15em; color: var(--gold); text-transform: uppercase; margin-bottom: 4px; }
+  .verify-url { font-family: 'Unbounded', sans-serif; font-size: 0.9rem; font-weight: 500; }
 
   .verify-arrow {
     color: var(--gold);
     font-size: 1.2rem;
-    transition: transform 0.2s;
+    transition: transform 0.25s var(--ease-soft);
+    will-change: transform;
   }
-  .verify-link:hover .verify-arrow { transform: translate(4px, -4px); }
 
   /* ── FOOTER ── */
   footer {
@@ -560,22 +802,11 @@
     align-items: center;
     justify-content: space-between;
     background: var(--surface);
+    position: relative;
+    z-index: 1;
   }
-
-  .footer-logo {
-    font-family: 'Unbounded', sans-serif;
-    font-size: 0.9rem;
-    font-weight: 700;
-    color: var(--gold);
-  }
-
-  .footer-text {
-    font-size: 0.72rem;
-    color: var(--text-muted);
-    letter-spacing: 0.08em;
-    text-align: center;
-  }
-
+  .footer-logo { font-family: 'Unbounded', sans-serif; font-size: 0.9rem; font-weight: 700; color: var(--gold); }
+  .footer-text { font-size: 0.72rem; color: var(--text-muted); letter-spacing: 0.08em; text-align: center; }
   .footer-conf {
     font-size: 0.68rem;
     letter-spacing: 0.15em;
@@ -586,77 +817,117 @@
   }
 
   /* ── ANIMATIONS ── */
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(24px); }
-    to   { opacity: 1; transform: translateY(0); }
+  @keyframes slideLine { 0% { left: -100%; } 100% { left: 200%; } }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 1; box-shadow: 0 0 12px var(--gold); }
+    50% { transform: scale(1.35); opacity: 0.7; box-shadow: 0 0 20px var(--gold); }
   }
-
-  @keyframes slideLine {
-    0%   { left: -100%; }
-    100% { left: 200%; }
+  @keyframes drift1 {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(-40px, 30px); }
   }
-
-  .reveal {
-    opacity: 0;
-    transform: translateY(32px);
-    transition: opacity 0.7s ease, transform 0.7s ease;
+  @keyframes drift2 {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(36px, -28px); }
   }
-  .reveal.visible {
-    opacity: 1;
-    transform: none;
+  @keyframes ringPulse {
+    0% { transform: scale(0.6); opacity: 0.9; }
+    70% { transform: scale(2.2); opacity: 0; }
+    100% { transform: scale(2.2); opacity: 0; }
   }
 
   /* ── RESPONSIVE ── */
   @media (max-width: 900px) {
     header { padding: 16px 24px; }
+    header.scrolled { padding: 12px 24px; }
     section { padding: 80px 24px; }
     .hero { padding: 0 24px 64px; }
-
+    .scroll-hint { right: 24px; }
     .hero-metrics { grid-template-columns: 1fr; }
-    .hero-metric { border-right: none; border-bottom: 1px solid var(--border); }
+    .hero-metric { border-right: none; border-bottom: 1px solid var(--border); padding: 22px 32px; }
     .hero-metric:last-child { border-bottom: none; }
-
     .stats-grid { grid-template-columns: 1fr; }
     .deal-grid { grid-template-columns: 1fr; }
-    .factors-grid { grid-template-columns: 1fr; }
+    .factors-grid { grid-template-columns: 1fr; gap: 36px; }
     .perks-grid { grid-template-columns: 1fr; }
     .timeline { flex-direction: column; }
     .timeline-item { border-right: none; border-bottom: 1px solid var(--border); }
+    .timeline-item:last-child { border-bottom: none; }
+    .timeline-bar { width: 0; height: 3px; }
+    .chart-wrap { padding: 28px 18px 22px; }
+    .verify-link { padding: 22px 24px; }
     footer { flex-direction: column; gap: 16px; text-align: center; }
     .scroll-hint { display: none; }
+    .orb-1, .orb-2 { display: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+    .reveal, .stagger > *, .hero-year, .hero-sub, .hero-metrics, .scroll-hint { opacity: 1 !important; transform: none !important; }
+    .line-inner { transform: none !important; }
+    .chart-line { stroke-dashoffset: 0 !important; }
+    .chart-area, .chart-dot, .chart-principal, .principal-label, .cross-marker { opacity: 1 !important; transform: none !important; }
+    .timeline-bar { transition: none !important; }
   }
 </style>
 </head>
 <body>
 
+<!-- GOLDEN THREAD LAYER -->
+<svg id="thread" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="threadGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#9c7a2a"/>
+      <stop offset="50%" stop-color="#e8c97a"/>
+      <stop offset="100%" stop-color="#c9a84c"/>
+    </linearGradient>
+  </defs>
+  <path id="threadGhost" class="thread-ghost" d=""/>
+  <path id="threadActive" class="thread-active" d=""/>
+  <circle id="threadHeadRing" class="thread-head-ring" r="7" cx="-100" cy="-100"/>
+  <circle id="threadHead" class="thread-head" r="3.5" cx="-100" cy="-100"/>
+</svg>
+
+<!-- SCROLL PROGRESS -->
+<div class="scroll-progress"><div class="scroll-progress-bar" id="progressBar"></div></div>
+
 <!-- HEADER -->
-<header>
-  <div class="logo">А&amp;М Технологии</div>
+<header id="header">
+  <div class="logo"><span class="logo-mark"></span>А&amp;М Технологии</div>
   <div class="header-badge">Частное инвестирование · 2026</div>
 </header>
 
 
 <!-- HERO -->
-<section class="hero">
+<section class="hero" id="hero">
   <div class="hero-bg"></div>
-  <div style="position:relative; z-index:1;">
+  <div class="hero-grid"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <div class="hero-inner">
     <p class="hero-year">Инвестиционное предложение · 2026</p>
     <h1 class="hero-title">
-      А&amp;М Технологии
-      <span>Сборка и продажа ПК</span>
+      <span class="line-mask"><span class="line-inner">А&amp;М Технологии</span></span>
+      <span class="line-mask"><span class="line-inner gold-text">Сборка и продажа ПК</span></span>
     </h1>
     <p class="hero-sub">Маркетплейсы · Магазин · Сервисный центр · Доставка техники под заказ</p>
     <div class="hero-metrics">
       <div class="hero-metric">
-        <div class="hero-metric-val">1 000 000 ₽</div>
+        <div class="hero-metric-val" data-count-to="1000000" data-suffix=" ₽">1 000 000 ₽</div>
         <div class="hero-metric-label">Сумма инвестиции</div>
       </div>
       <div class="hero-metric">
-        <div class="hero-metric-val">75%</div>
+        <div class="hero-metric-val" data-count-to="75" data-suffix="%">75%</div>
         <div class="hero-metric-label">Гарантированная доходность / год</div>
       </div>
       <div class="hero-metric">
-        <div class="hero-metric-val">300%</div>
+        <div class="hero-metric-val" data-count-to="300" data-suffix="%">300%</div>
         <div class="hero-metric-label">Рост год к году (3 года)</div>
       </div>
     </div>
@@ -670,36 +941,36 @@
 
 <!-- STATS -->
 <section class="stats-section">
-  <div class="section-tag">Бизнес в цифрах</div>
+  <div class="section-tag reveal">Бизнес в цифрах</div>
   <h2 class="section-title reveal">Результаты 2025 года</h2>
-  <div class="stats-grid reveal">
+  <div class="stats-grid stagger">
     <div class="stat-card">
-      <div class="stat-number">56 млн ₽</div>
+      <div class="stat-number" data-count-to="56" data-suffix=" млн ₽">56 млн ₽</div>
       <div class="stat-label">Общий оборот 2025</div>
       <div class="stat-note">Рост ~300% vs предыдущий год</div>
     </div>
     <div class="stat-card">
-      <div class="stat-number">34,5 млн ₽</div>
+      <div class="stat-number" data-count-to="34.5" data-decimals="1" data-suffix=" млн ₽">34,5 млн ₽</div>
       <div class="stat-label">Яндекс.Маркет 2025</div>
       <div class="stat-note">Активно с мая — 5 месяцев продаж</div>
     </div>
     <div class="stat-card">
-      <div class="stat-number">~21,5 млн ₽</div>
+      <div class="stat-number" data-count-to="21.5" data-decimals="1" data-prefix="~" data-suffix=" млн ₽">~21,5 млн ₽</div>
       <div class="stat-label">Офлайн + прочее</div>
       <div class="stat-note">Магазин, сервис, доставка</div>
     </div>
     <div class="stat-card">
-      <div class="stat-number">3,7 млн</div>
+      <div class="stat-number" data-count-to="3.7" data-decimals="1" data-suffix=" млн">3,7 млн</div>
       <div class="stat-label">Показы на Маркете</div>
       <div class="stat-note">Органически, без рекламы</div>
     </div>
     <div class="stat-card">
-      <div class="stat-number">41 млн ₽</div>
+      <div class="stat-number" data-count-to="41" data-suffix=" млн ₽">41 млн ₽</div>
       <div class="stat-label">Заказано на Маркете</div>
       <div class="stat-note">34,2 млн доставлено (83%)</div>
     </div>
     <div class="stat-card">
-      <div class="stat-number">3 года</div>
+      <div class="stat-number" data-count-to="3" data-suffix=" года">3 года</div>
       <div class="stat-label">Возраст компании</div>
       <div class="stat-note">Белая история, учёт доход-расход</div>
     </div>
@@ -709,10 +980,10 @@
 
 <!-- DEAL -->
 <section class="deal-section">
-  <div class="section-tag">Условия</div>
+  <div class="section-tag reveal">Условия</div>
   <h2 class="section-title reveal">Структура сделки</h2>
 
-  <div class="deal-grid reveal">
+  <div class="deal-grid stagger">
     <div class="deal-cell">
       <div class="deal-icon">💼</div>
       <div>
@@ -739,7 +1010,7 @@
       <div>
         <div class="deal-cell-label">Механизм</div>
         <div class="deal-cell-value">6% от чистой прибыли ежеквартально</div>
-        <div class="deal-cell-note">Если 6% > мин. — платится факт</div>
+        <div class="deal-cell-note">Если 6% &gt; мин. — платится факт</div>
       </div>
     </div>
     <div class="deal-cell">
@@ -759,7 +1030,7 @@
   </div>
 
   <div class="deal-highlight reveal">
-    <strong style="color:var(--gold);">750 000 ₽ / год</strong> — гарантированный минимум<br>
+    <strong data-count-to="750000" data-suffix=" ₽ / год">750 000 ₽ / год</strong> — гарантированный минимум<br>
     150 000 ₽ в Q1 + 200 000 ₽ × 3 квартала
   </div>
 </section>
@@ -767,58 +1038,136 @@
 
 <!-- SCHEDULE -->
 <section class="schedule-section">
-  <div class="section-tag">Выплаты</div>
-  <h2 class="section-title reveal">График выплат</h2>
-  <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:40px; margin-top:-40px;" class="reveal">Ежеквартальные выплаты — гарантированный минимум</p>
+  <div class="section-tag reveal">Выплаты</div>
+  <h2 class="section-title reveal" style="margin-bottom:16px;">График выплат</h2>
+  <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:40px;" class="reveal">Ежеквартальные выплаты — гарантированный минимум</p>
 
-  <div class="timeline reveal">
+  <div class="timeline stagger" id="timeline">
     <div class="timeline-item">
       <div class="timeline-q">Q1</div>
-      <div class="timeline-amount">150 000 ₽</div>
+      <div class="timeline-amount" data-count-to="150000" data-suffix=" ₽">150 000 ₽</div>
       <div class="timeline-label">Первый квартал</div>
-      <div class="timeline-bar" style="width:75%"></div>
+      <div class="timeline-bar" data-width="75"></div>
     </div>
     <div class="timeline-item">
       <div class="timeline-q">Q2</div>
-      <div class="timeline-amount">200 000 ₽</div>
+      <div class="timeline-amount" data-count-to="200000" data-suffix=" ₽">200 000 ₽</div>
       <div class="timeline-label">Второй квартал</div>
-      <div class="timeline-bar" style="width:100%"></div>
+      <div class="timeline-bar" data-width="100"></div>
     </div>
     <div class="timeline-item">
       <div class="timeline-q">Q3</div>
-      <div class="timeline-amount">200 000 ₽</div>
+      <div class="timeline-amount" data-count-to="200000" data-suffix=" ₽">200 000 ₽</div>
       <div class="timeline-label">Третий квартал</div>
-      <div class="timeline-bar" style="width:100%"></div>
+      <div class="timeline-bar" data-width="100"></div>
     </div>
     <div class="timeline-item">
       <div class="timeline-q">∞</div>
-      <div class="timeline-amount">200 000+ ₽</div>
+      <div class="timeline-amount" data-count-to="200000" data-suffix="+ ₽">200 000+ ₽</div>
       <div class="timeline-label">Каждый следующий</div>
-      <div class="timeline-bar" style="width:100%"></div>
+      <div class="timeline-bar" data-width="100"></div>
     </div>
   </div>
 
   <div class="schedule-note reveal">
     ✓ Если <strong>6% от реальной чистой прибыли</strong> превышает минимум — инвестор получает фактическую сумму, не минимум
   </div>
+
+  <!-- SIGNATURE: cumulative payouts chart -->
+  <div class="chart-wrap reveal" id="chartWrap">
+    <div class="chart-head">
+      <div>
+        <div class="chart-title">Накопленные выплаты инвестору</div>
+        <div class="chart-sub">По гарантированному минимуму · нарастающим итогом, тыс. ₽</div>
+      </div>
+      <div class="chart-legend">
+        <div class="legend-item"><span class="legend-swatch line"></span>Накопленные выплаты</div>
+        <div class="legend-item"><span class="legend-swatch principal"></span>Тело инвестиции</div>
+      </div>
+    </div>
+
+    <svg class="chart-svg" viewBox="0 0 800 380" preserveAspectRatio="xMidYMid meet" role="img" aria-label="График накопленных выплат инвестору по кварталам">
+      <defs>
+        <linearGradient id="lineGrad" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#9c7a2a"/>
+          <stop offset="100%" stop-color="#f0d488"/>
+        </linearGradient>
+        <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="rgba(201,168,76,0.32)"/>
+          <stop offset="100%" stop-color="rgba(201,168,76,0)"/>
+        </linearGradient>
+      </defs>
+
+      <!-- gridlines -->
+      <line class="grid-line" x1="60" y1="243.1" x2="770" y2="243.1"/>
+      <line class="grid-line" x1="60" y1="49.4"  x2="770" y2="49.4"/>
+      <line class="grid-line" x1="60" y1="340"   x2="770" y2="340"/>
+      <text class="axis-label" x="50" y="247" text-anchor="end">500к</text>
+      <text class="axis-label" x="50" y="53"  text-anchor="end">1,5 млн</text>
+      <text class="axis-label" x="50" y="344" text-anchor="end">0</text>
+
+      <!-- principal line @ 1 000 000 -->
+      <line class="chart-principal" x1="60" y1="146.25" x2="770" y2="146.25"/>
+      <text class="principal-label" x="770" y="138">Тело · 1 000 000 ₽</text>
+
+      <!-- area -->
+      <path class="chart-area" fill="url(#areaGrad)"
+        d="M60,310.9 L161.4,272.2 L262.9,233.4 L364.3,194.7 L465.7,155.9 L567.1,117.2 L668.6,78.4 L770,39.7 L770,340 L60,340 Z"/>
+
+      <!-- line -->
+      <path class="chart-line" id="chartLine"
+        d="M60,310.9 L161.4,272.2 L262.9,233.4 L364.3,194.7 L465.7,155.9 L567.1,117.2 L668.6,78.4 L770,39.7"/>
+
+      <!-- crossing marker (cumulative > principal ≈ Q6) -->
+      <g class="cross-marker">
+        <circle class="cross-ring" cx="491.1" cy="146.25" r="6"/>
+        <circle class="cross-dot" cx="491.1" cy="146.25" r="5"/>
+        <text class="cross-label" x="500" y="172">тело отбито ≈ 6 кв.</text>
+      </g>
+
+      <!-- dots -->
+      <circle class="chart-dot" cx="60"    cy="310.9" r="5"/>
+      <circle class="chart-dot" cx="161.4" cy="272.2" r="5"/>
+      <circle class="chart-dot" cx="262.9" cy="233.4" r="5"/>
+      <circle class="chart-dot" cx="364.3" cy="194.7" r="5"/>
+      <circle class="chart-dot" cx="465.7" cy="155.9" r="5"/>
+      <circle class="chart-dot" cx="567.1" cy="117.2" r="5"/>
+      <circle class="chart-dot" cx="668.6" cy="78.4"  r="5"/>
+      <circle class="chart-dot" cx="770"   cy="39.7"  r="5"/>
+
+      <!-- x labels -->
+      <text class="x-label" x="60"    y="362">Q1</text>
+      <text class="x-label" x="161.4" y="362">Q2</text>
+      <text class="x-label" x="262.9" y="362">Q3</text>
+      <text class="x-label" x="364.3" y="362">Q4</text>
+      <text class="x-label" x="465.7" y="362">Q5</text>
+      <text class="x-label" x="567.1" y="362">Q6</text>
+      <text class="x-label" x="668.6" y="362">Q7</text>
+      <text class="x-label" x="770"   y="362">Q8</text>
+    </svg>
+
+    <p class="chart-foot">
+      Уже на <strong>6-м квартале</strong> накопленные гарантированные выплаты (1 150 000 ₽) превышают тело инвестиции — далее ~200 000+ ₽ каждый квартал бессрочно.
+    </p>
+  </div>
 </section>
 
 
 <!-- FACTORS -->
 <section class="factors-section">
-  <div class="section-tag">Анализ</div>
+  <div class="section-tag reveal">Анализ</div>
   <h2 class="section-title reveal">Факторы сделки</h2>
 
-  <div class="factors-grid reveal">
+  <div class="factors-grid">
     <!-- PROS -->
-    <div>
+    <div class="reveal">
       <div class="factor-group-title green">✅ Сильные стороны</div>
-      <ul class="factor-list">
+      <ul class="factor-list stagger">
         <li class="factor-item pro">
           <div class="factor-icon">📊</div>
           <div class="factor-text">
             <strong>Реальный бизнес</strong>
-            <span>Маркет, фической, сайт верифицированы публично</span>
+            <span>Маркет, точка и сайт публично верифицируются</span>
           </div>
         </li>
         <li class="factor-item pro">
@@ -867,9 +1216,9 @@
     </div>
 
     <!-- CONS -->
-    <div>
+    <div class="reveal">
       <div class="factor-group-title red">⚠️ Риски и открытые вопросы</div>
-      <ul class="factor-list">
+      <ul class="factor-list stagger">
         <li class="factor-item con">
           <div class="factor-icon">📝</div>
           <div class="factor-text">
@@ -913,10 +1262,10 @@
 
 <!-- PERKS -->
 <section class="perks-section">
-  <div class="section-tag">Нефинансовые условия</div>
+  <div class="section-tag reveal">Нефинансовые условия</div>
   <h2 class="section-title reveal">Бонусы для инвестора</h2>
 
-  <div class="perks-grid reveal">
+  <div class="perks-grid stagger">
     <div class="perk-card">
       <span class="perk-icon">📱</span>
       <div class="perk-title">Замена устройств</div>
@@ -953,11 +1302,11 @@
 
 <!-- VERIFY -->
 <section class="verify-section">
-  <div class="section-tag">Верификация</div>
+  <div class="section-tag reveal">Верификация</div>
   <h2 class="section-title reveal">Проверить бизнес</h2>
 
-  <div class="verify-links reveal">
-    <a href="https://market.yandex.ru/cc/8pEnZk" target="_blank" class="verify-link">
+  <div class="verify-links stagger">
+    <a href="https://market.yandex.ru/cc/8pEnZk" target="_blank" rel="noopener" class="verify-link">
       <div class="verify-link-left">
         <span style="font-size:1.6rem">🛒</span>
         <div>
@@ -967,7 +1316,7 @@
       </div>
       <span class="verify-arrow">↗</span>
     </a>
-    <a href="https://amtechnology.shop" target="_blank" class="verify-link">
+    <a href="https://amtechnology.shop" target="_blank" rel="noopener" class="verify-link">
       <div class="verify-link-left">
         <span style="font-size:1.6rem">🌐</span>
         <div>
@@ -977,7 +1326,7 @@
       </div>
       <span class="verify-arrow">↗</span>
     </a>
-    <a href="https://yandex.ru/maps/org/a_m_tekhnologii/198261445651" target="_blank" class="verify-link">
+    <a href="https://yandex.ru/maps/org/a_m_tekhnologii/198261445651" target="_blank" rel="noopener" class="verify-link">
       <div class="verify-link-left">
         <span style="font-size:1.6rem">📍</span>
         <div>
@@ -1000,17 +1349,224 @@
 
 
 <script>
-  // Scroll reveal
-  const reveals = document.querySelectorAll('.reveal');
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach((entry, i) => {
-      if (entry.isIntersecting) {
-        setTimeout(() => entry.target.classList.add('visible'), i * 80);
-        observer.unobserve(entry.target);
-      }
+(function () {
+  'use strict';
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ── Hero load reveal ── */
+  var hero = document.getElementById('hero');
+  requestAnimationFrame(function () {
+    requestAnimationFrame(function () { hero.classList.add('loaded'); });
+  });
+
+  /* ── Number formatting + count-up ── */
+  function fmt(n, d) {
+    var f = n.toFixed(d);
+    var parts = f.split('.');
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+    return parts[1] ? parts[0] + ',' + parts[1] : parts[0];
+  }
+  function animateCount(el) {
+    var target = parseFloat(el.dataset.countTo);
+    var decimals = parseInt(el.dataset.decimals || '0', 10);
+    var prefix = el.dataset.prefix || '';
+    var suffix = el.dataset.suffix || '';
+    if (reduce || isNaN(target)) {
+      el.textContent = prefix + fmt(isNaN(target) ? 0 : target, decimals) + suffix;
+      return;
+    }
+    var dur = 1700, t0 = performance.now();
+    function step(now) {
+      var p = Math.min((now - t0) / dur, 1);
+      var e = 1 - Math.pow(1 - p, 3);
+      el.textContent = prefix + fmt(target * e, decimals) + suffix;
+      if (p < 1) requestAnimationFrame(step);
+      else el.textContent = prefix + fmt(target, decimals) + suffix;
+    }
+    requestAnimationFrame(step);
+  }
+
+  /* ── Reveal / stagger observer ── */
+  var revealObs = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (!e.isIntersecting) return;
+      e.target.classList.add('visible');
+      // fill timeline bars when their row appears
+      var bars = e.target.querySelectorAll('.timeline-bar[data-width]');
+      bars.forEach(function (b) { b.style.width = b.dataset.width + '%'; });
+      revealObs.unobserve(e.target);
     });
-  }, { threshold: 0.1 });
-  reveals.forEach(el => observer.observe(el));
+  }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+  document.querySelectorAll('.reveal, .stagger').forEach(function (el) { revealObs.observe(el); });
+
+  /* ── Count-up observer ── */
+  var countObs = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (!e.isIntersecting) return;
+      animateCount(e.target);
+      countObs.unobserve(e.target);
+    });
+  }, { threshold: 0.6 });
+  document.querySelectorAll('[data-count-to]').forEach(function (el) { countObs.observe(el); });
+  // hero metrics count immediately on load (they're above the fold)
+  document.querySelectorAll('.hero-metric-val[data-count-to]').forEach(function (el) {
+    countObs.unobserve(el);
+    setTimeout(function () { animateCount(el); }, 800);
+  });
+
+  /* ── Chart draw observer ── */
+  var chartWrap = document.getElementById('chartWrap');
+  var chartLine = document.getElementById('chartLine');
+  if (chartWrap && chartLine) {
+    try {
+      var len = chartLine.getTotalLength();
+      chartLine.style.strokeDasharray = len;
+      chartLine.style.strokeDashoffset = reduce ? 0 : len;
+    } catch (err) { /* ignore */ }
+    var chartObs = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        chartWrap.classList.add('draw');
+        chartLine.style.strokeDashoffset = 0;
+        chartObs.unobserve(e.target);
+      });
+    }, { threshold: 0.3 });
+    chartObs.observe(chartWrap);
+  }
+
+  /* ── Golden thread winding around each block ── */
+  var threadSvg = document.getElementById('thread');
+  var threadGhost = document.getElementById('threadGhost');
+  var threadActive = document.getElementById('threadActive');
+  var threadHead = document.getElementById('threadHead');
+  var threadHeadRing = document.getElementById('threadHeadRing');
+  var threadLen = 0;
+
+  function catmullRom(points) {
+    if (points.length < 2) return '';
+    var d = 'M ' + points[0][0].toFixed(1) + ' ' + points[0][1].toFixed(1);
+    for (var i = 0; i < points.length - 1; i++) {
+      var p0 = points[i - 1] || points[i];
+      var p1 = points[i];
+      var p2 = points[i + 1];
+      var p3 = points[i + 2] || p2;
+      var c1x = p1[0] + (p2[0] - p0[0]) / 6, c1y = p1[1] + (p2[1] - p0[1]) / 6;
+      var c2x = p2[0] - (p3[0] - p1[0]) / 6, c2y = p2[1] - (p3[1] - p1[1]) / 6;
+      d += ' C ' + c1x.toFixed(1) + ' ' + c1y.toFixed(1) + ', ' + c2x.toFixed(1) + ' ' + c2y.toFixed(1) +
+           ', ' + p2[0].toFixed(1) + ' ' + p2[1].toFixed(1);
+    }
+    return d;
+  }
+
+  function buildThread() {
+    if (!threadSvg || !threadActive) return;
+    var W = document.documentElement.clientWidth;
+    var H = document.documentElement.scrollHeight;
+    threadSvg.style.height = H + 'px';
+    var rail = Math.max(16, Math.min(48, W * 0.045));
+    var leftX = rail, rightX = W - rail, midX = W / 2;
+    var pts = [[midX, 0]];
+    document.querySelectorAll('section').forEach(function (sec, i) {
+      var r = sec.getBoundingClientRect();
+      var cy = r.top + window.scrollY + r.height / 2;
+      pts.push([(i % 2 === 0) ? leftX : rightX, cy]);
+    });
+    pts.push([midX, H]);
+    var d = catmullRom(pts);
+    threadGhost.setAttribute('d', d);
+    threadActive.setAttribute('d', d);
+    try {
+      threadLen = threadActive.getTotalLength();
+      threadActive.style.strokeDasharray = threadLen;
+      threadActive.style.strokeDashoffset = reduce ? 0 : threadLen;
+    } catch (e) { threadLen = 0; }
+    if (reduce) {
+      threadHead.style.opacity = 0;
+      threadHeadRing.style.opacity = 0;
+    } else {
+      updateThread();
+    }
+  }
+
+  function updateThread() {
+    if (!threadLen || reduce) return;
+    var st = window.scrollY || document.documentElement.scrollTop;
+    var docH = document.documentElement.scrollHeight - window.innerHeight;
+    var p = docH > 0 ? Math.min(Math.max(st / docH, 0), 1) : 0;
+    var drawn = threadLen * p;
+    threadActive.style.strokeDashoffset = threadLen - drawn;
+    try {
+      var pt = threadActive.getPointAtLength(drawn);
+      threadHead.setAttribute('cx', pt.x.toFixed(1));
+      threadHead.setAttribute('cy', pt.y.toFixed(1));
+      threadHeadRing.setAttribute('cx', pt.x.toFixed(1));
+      threadHeadRing.setAttribute('cy', pt.y.toFixed(1));
+      var vis = (p > 0.004 && p < 0.996) ? 1 : 0;
+      threadHead.style.opacity = vis;
+      threadHeadRing.style.opacity = vis ? 0.6 : 0;
+    } catch (e) {}
+  }
+
+  /* ── Scroll: progress bar + header + parallax ── */
+  var progressBar = document.getElementById('progressBar');
+  var header = document.getElementById('header');
+  var heroBg = document.querySelector('.hero-bg');
+  var orbs = document.querySelectorAll('.orb');
+  var ticking = false;
+  function onScroll() {
+    var st = window.scrollY || document.documentElement.scrollTop;
+    var docH = document.documentElement.scrollHeight - window.innerHeight;
+    progressBar.style.width = (docH > 0 ? (st / docH) * 100 : 0) + '%';
+    header.classList.toggle('scrolled', st > 40);
+    if (!reduce) {
+      if (heroBg && st < window.innerHeight * 1.2) heroBg.style.transform = 'translateY(' + (st * 0.28) + 'px)';
+      orbs.forEach(function (o, i) {
+        if (st < window.innerHeight * 1.2) o.style.transform = 'translateY(' + (st * (0.12 + i * 0.06)) + 'px)';
+      });
+    }
+    updateThread();
+    ticking = false;
+  }
+  window.addEventListener('scroll', function () {
+    if (!ticking) { requestAnimationFrame(onScroll); ticking = true; }
+  }, { passive: true });
+  onScroll();
+
+  /* ── Build the thread + keep it synced ── */
+  buildThread();
+  window.addEventListener('load', buildThread);
+  setTimeout(buildThread, 1200);
+  var resizeTimer;
+  window.addEventListener('resize', function () {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(buildThread, 200);
+  }, { passive: true });
+
+  /* ── Cursor-follow glow on cards ── */
+  if (!reduce && window.matchMedia('(pointer: fine)').matches) {
+    document.querySelectorAll('.stat-card, .perk-card').forEach(function (card) {
+      card.addEventListener('mousemove', function (ev) {
+        var r = card.getBoundingClientRect();
+        card.style.setProperty('--mx', ((ev.clientX - r.left) / r.width * 100) + '%');
+        card.style.setProperty('--my', ((ev.clientY - r.top) / r.height * 100) + '%');
+      });
+    });
+
+    /* ── Magnetic verify arrows ── */
+    document.querySelectorAll('.verify-link').forEach(function (link) {
+      var arrow = link.querySelector('.verify-arrow');
+      link.addEventListener('mousemove', function (ev) {
+        var r = link.getBoundingClientRect();
+        var dx = (ev.clientX - (r.left + r.width / 2)) * 0.08;
+        var dy = (ev.clientY - (r.top + r.height / 2)) * 0.18;
+        arrow.style.transform = 'translate(' + dx + 'px,' + dy + 'px)';
+      });
+      link.addEventListener('mouseleave', function () {
+        arrow.style.transform = 'translate(0,0)';
+      });
+    });
+  }
+})();
 </script>
 
 </body>
